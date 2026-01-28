@@ -2,17 +2,25 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isAccelerating = false
-    @State private var isBraking = false
-    @State private var isTurningLeft = false
-    @State private var isTurningRight = false
+    @State private var joystickX: Double = 0 // -1.0（左）〜 1.0（右）
+    @State private var joystickY: Double = 0 // -1.0（後）〜 1.0（前）
+
+    // ジョイスティックから左右の操作を計算
+    private var isTurningLeft: Bool {
+        joystickX < -0.3
+    }
+
+    private var isTurningRight: Bool {
+        joystickX > 0.3
+    }
 
     var body: some View {
         ZStack {
             ARViewContainer(
                 isAccelerating: $isAccelerating,
-                isBraking: $isBraking,
-                isTurningLeft: $isTurningLeft,
-                isTurningRight: $isTurningRight
+                isBraking: .constant(false),
+                isTurningLeft: .constant(isTurningLeft),
+                isTurningRight: .constant(isTurningRight)
             )
             .edgesIgnoringSafeArea(.all)
 
@@ -25,74 +33,40 @@ struct ContentView: View {
                     .cornerRadius(10)
                 Spacer()
 
-                // 左右コントロールボタン
-                HStack(spacing: 60) {
-                    // 左ボタン
-                    Button(action: {}) {
-                        Image(systemName: "arrow.left")
-                            .font(.system(size: 30, weight: .bold))
+                // コントロール
+                HStack(alignment: .bottom, spacing: 40) {
+                    // 左側: ジョイスティック（前後左右）
+                    VStack {
+                        Text("移動")
+                            .font(.caption)
                             .foregroundColor(.white)
-                            .frame(width: 80, height: 80)
-                            .background(isTurningLeft ? Color.blue : Color.blue.opacity(0.6))
-                            .cornerRadius(40)
+                        Joystick(xAxis: $joystickX, yAxis: $joystickY)
                     }
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in isTurningLeft = true }
-                            .onEnded { _ in isTurningLeft = false }
-                    )
 
-                    // 右ボタン
-                    Button(action: {}) {
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 30, weight: .bold))
+                    Spacer()
+
+                    // 右側: アクセル
+                    VStack {
+                        Text("アクセル")
+                            .font(.caption)
                             .foregroundColor(.white)
-                            .frame(width: 80, height: 80)
-                            .background(isTurningRight ? Color.blue : Color.blue.opacity(0.6))
-                            .cornerRadius(40)
+                        // アクセルボタン
+                        Button(action: {}) {
+                            Text("A")
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundColor(.white)
+                                .frame(width: 120, height: 120)
+                                .background(isAccelerating ? Color.green : Color.green.opacity(0.6))
+                                .cornerRadius(60)
+                        }
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in isAccelerating = true }
+                                .onEnded { _ in isAccelerating = false }
+                        )
                     }
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in isTurningRight = true }
-                            .onEnded { _ in isTurningRight = false }
-                    )
                 }
-                .padding(.bottom, 20)
-
-                // アクセル・ブレーキボタン
-                HStack(spacing: 40) {
-                    // ブレーキボタン（ボタンB）
-                    Button(action: {}) {
-                        Text("B\nブレーキ")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 120, height: 120)
-                            .background(isBraking ? Color.red : Color.red.opacity(0.6))
-                            .cornerRadius(60)
-                    }
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in isBraking = true }
-                            .onEnded { _ in isBraking = false }
-                    )
-
-                    // アクセルボタン（ボタンA）
-                    Button(action: {}) {
-                        Text("A\nアクセル")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.center)
-                            .frame(width: 120, height: 120)
-                            .background(isAccelerating ? Color.green : Color.green.opacity(0.6))
-                            .cornerRadius(60)
-                    }
-                    .simultaneousGesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { _ in isAccelerating = true }
-                            .onEnded { _ in isAccelerating = false }
-                    )
-                }
+                .padding(.horizontal, 30)
                 .padding(.bottom, 50)
             }
         }

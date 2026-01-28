@@ -72,8 +72,8 @@ struct ARViewContainer: UIViewRepresentable {
         var isTurningLeft: Bool = false
         var isTurningRight: Bool = false
 
-        private let maxSpeed: Float = 0.3 // 最大速度 30cm/s
-        private let acceleration: Float = 0.01 // 加速度
+        private let maxSpeed: Float = 0.2 // 最大速度 20cm/s
+        private let acceleration: Float = 0.005 // 加速度
         private let deceleration: Float = 0.02 // 減速度
         private let rotationSpeed: Float = 0.05 // 回転速度（ラジアン/フレーム）
 
@@ -111,8 +111,8 @@ struct ARViewContainer: UIViewRepresentable {
         private func placeBlueCube(on imageAnchor: ARImageAnchor) {
             guard let arView = arView else { return }
 
-            // 青い立方体を作成（5cm x 5cm x 5cm）
-            let cubeMesh = MeshResource.generateBox(size: 0.05)
+            // 青い立方体を作成（2.5cm x 2.5cm x 2.5cm）
+            let cubeMesh = MeshResource.generateBox(size: 0.025)
             var material = SimpleMaterial()
             material.color = .init(tint: .blue, texture: nil)
 
@@ -122,7 +122,7 @@ struct ARViewContainer: UIViewRepresentable {
             let anchorEntity = AnchorEntity(anchor: imageAnchor)
 
             // 立方体を画像の上に配置（立方体の半分の高さ分上げる）
-            cube.position = SIMD3<Float>(0, 0.025, 0)
+            cube.position = SIMD3<Float>(0, 0.0125, 0)
 
             anchorEntity.addChild(cube)
             arView.scene.addAnchor(anchorEntity)
